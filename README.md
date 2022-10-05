@@ -23,7 +23,6 @@ def ods_chunks():
     with httpx.stream('GET', 'https://www.example.com/my.ods') as r:
         yield from r.iter_bytes(chunk_size=65536)
 
-
 for name, rows in stream_read_ods(ods_chunks()):
 	print(name)  # Sheet name
 	for row in rows:
