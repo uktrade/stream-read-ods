@@ -24,7 +24,7 @@ def ods_chunks():
         yield from r.iter_bytes(chunk_size=65536)
 
 for name, rows in stream_read_ods(ods_chunks()):
-	print(name)  # Sheet name
-	for row in rows:
-		print(row)  # Tuple of cells
+    print(name)  # Sheet name
+    for row in rows:
+        print(row)  # Tuple of cells
 ```
