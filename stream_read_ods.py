@@ -56,7 +56,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 if event == 'start' and f'{pref}table-row' == element.tag:
                     row = []
 
-                 # Ending a row
+                # Ending a row
                 if event == 'end' and f'{pref}table-row' == element.tag:
                     yield sheet, sheet_name, tuple(row)
 
