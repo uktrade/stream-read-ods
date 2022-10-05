@@ -23,6 +23,7 @@ setuptools.setup(
     python_requires='>=3.7.4',
     install_requires=[
         'stream-unzip>=0.0.70',
+        'lxml>=4.9.1',
     ],
     py_modules=[
         'stream_read_ods',
