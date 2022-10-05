@@ -34,6 +34,10 @@ stream-inflate==0.0.14
     # via stream-unzip
 stream-unzip==0.0.70
     # via stream-read-ods
+stream-write-ods==0.0.22
+    # via -r requirements-dev.in
+stream-zip==0.0.50
+    # via stream-write-ods
 tomli==2.0.1
     # via
     #   coverage
