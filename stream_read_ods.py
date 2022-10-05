@@ -1,3 +1,5 @@
+from itertools import groupby
+
 from lxml import etree
 from stream_unzip import stream_unzip
 
@@ -43,8 +45,28 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         sheet_name = None
 
         pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
-        for event, element in doc:
-            if event == 'start' and f'{pref}table' == element.tag:
-                sheet = object()
-                sheet_name = element.attrib[f'{pref}name']
-                yield sheet_name
+        def rows():
+            for event, element in doc:
+                # Starting a table
+                if event == 'start' and f'{pref}table' == element.tag:
+                    sheet = object()
+                    sheet_name = element.attrib[f'{pref}name']
+
+                # Starting a row
+                if event == 'start' and f'{pref}table-row' == element.tag:
+                    row = []
+
+                 # Ending a row
+                if event == 'end' and f'{pref}table-row' == element.tag:
+                    yield sheet, sheet_name, tuple(row)
+
+                if event == 'start' and f'{pref}table-cell' == element.tag:
+                    row.append('')
+
+        def tidied(rows):
+            for _, _, row in row:
+                yield row
+
+        grouped = groupby(rows(), lambda row: (row[0], row[1]))
+        for (_, sheet_name), rows in grouped:
+            yield sheet_name, (row for (_, _, row) in rows)

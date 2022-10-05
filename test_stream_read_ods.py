@@ -18,7 +18,10 @@ def test_sheets():
     ods_chunks = stream_write_ods(get_sheets())
 
     files = [
-        name
-        for name in stream_read_ods(ods_chunks)
+        (name, list(rows))
+        for name, rows in stream_read_ods(ods_chunks)
     ]
-    assert files == ['Sheet 1 name', 'Sheet 2 name']
+    assert files == [
+        ('Sheet 1 name', [('', ''), ('', ''), ('', '')]),
+        ('Sheet 2 name', [('',), ('',)]),
+    ]
