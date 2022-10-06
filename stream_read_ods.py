@@ -60,6 +60,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 if event == 'end' and f'{pref}table-row' == element.tag:
                     yield sheet, sheet_name, tuple(row)
 
+                # Starting a table cell
                 if event == 'start' and f'{pref}table-cell' == element.tag:
                     row.append('')
 
