@@ -35,43 +35,49 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         return FileLikeObj()
 
-    for name, size, chunks in stream_unzip(ods_chunks):
-        if name != b'content.xml':
-            for chunk in chunks:
-                pass
-            continue
+    def get_member_file(single_file_name, unzipped_files):
+        for name, size, chunks in unzipped_files:
+            if name != single_file_name:
+                for chunk in chunks:
+                    pass
+                continue
+            yield from chunks
 
-        doc = etree.iterparse(to_file_like_obj(chunks), events=('start', 'end'))
+    unzipped_member_files = stream_unzip(ods_chunks)
+    content_xml_chunks = get_member_file(b'content.xml', unzipped_member_files)
+    content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
 
-        sheet = None
-        sheet_name = None
+    doc = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
 
-        pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
-        def rows():
-            for event, element in doc:
-                # Starting a table
-                if event == 'start' and f'{pref}table' == element.tag:
-                    sheet = object()
-                    sheet_name = element.attrib[f'{pref}name']
+    sheet = None
+    sheet_name = None
 
-                # Starting a row
-                if event == 'start' and f'{pref}table-row' == element.tag:
-                    row = []
+    pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+    def rows():
+        for event, element in doc:
+            # Starting a table
+            if event == 'start' and f'{pref}table' == element.tag:
+                sheet = object()
+                sheet_name = element.attrib[f'{pref}name']
 
-                # Ending a row
-                if event == 'end' and f'{pref}table-row' == element.tag:
-                    yield sheet, sheet_name, tuple(row)
+            # Starting a row
+            if event == 'start' and f'{pref}table-row' == element.tag:
+                row = []
 
-                # Starting a table cell
-                if event == 'start' and f'{pref}table-cell' == element.tag:
-                    row.append('')
+            # Ending a row
+            if event == 'end' and f'{pref}table-row' == element.tag:
+                yield sheet, sheet_name, tuple(row)
 
-                # Reduce memory usage
-                if event == 'end':
-                    element.clear()
-                    while element.getprevious() is not None:
-                        del element.getparent()[0]
+            # Starting a table cell
+            if event == 'start' and f'{pref}table-cell' == element.tag:
+                row.append('')
 
-        grouped = groupby(rows(), lambda row: (row[0], row[1]))
-        for (_, sheet_name), rows in grouped:
-            yield sheet_name, (row for (_, _, row) in rows)
+            # Reduce memory usage
+            if event == 'end':
+                element.clear()
+                while element.getprevious() is not None:
+                    del element.getparent()[0]
+
+    grouped = groupby(rows(), lambda row: (row[0], row[1]))
+    for (_, sheet_name), rows in grouped:
+        yield sheet_name, (row for (_, _, row) in rows)
