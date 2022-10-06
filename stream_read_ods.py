@@ -63,6 +63,12 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 if event == 'start' and f'{pref}table-cell' == element.tag:
                     row.append('')
 
+                # Reduce memory usage
+                if event == 'end':
+                    element.clear()
+                    while element.getprevious() is not None:
+                        del element.getparent()[0]
+
         grouped = groupby(rows(), lambda row: (row[0], row[1]))
         for (_, sheet_name), rows in grouped:
             yield sheet_name, (row for (_, _, row) in rows)
