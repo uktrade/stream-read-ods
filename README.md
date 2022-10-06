@@ -28,3 +28,11 @@ for name, rows in stream_read_ods(ods_chunks()):
     for row in rows:
         print(row)  # Tuple of cells
 ```
+
+
+## Running tests
+
+```
+pip install -r requirements-dev.txt
+pytest
+```
