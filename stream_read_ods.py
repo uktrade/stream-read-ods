@@ -44,8 +44,22 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             yield from chunks
 
     def get_sheets_and_rows(parsed_xml):
+        # It's slightly tricky to convert the event-based lxml parser to more useful
+        # "nested iterable" API. To do this, this generator yields tuples of
+        #
+        # (sheet, sheet_name, row)
+        #
+        # where sheet is a plain object() used as a sentinal value so a later call to
+        # groupby can then group rows into sheets
+        #
+        # The name of the sheet is not used since sheets can have identical names
+
         pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+
+        # A sentinal per sheet, to be able to groupby
         sheet = None
+
+        # The name of the sheet (exposed in the API)
         sheet_name = None
 
         for event, element in parsed_xml:
