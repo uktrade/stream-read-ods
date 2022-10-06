@@ -43,18 +43,12 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 continue
             yield from chunks
 
-    unzipped_member_files = stream_unzip(ods_chunks)
-    content_xml_chunks = get_member_file(b'content.xml', unzipped_member_files)
-    content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
-
-    doc = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
-
-    def rows():
+    def get_sheets_and_rows(parsed_xml):
         pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
         sheet = None
         sheet_name = None
 
-        for event, element in doc:
+        for event, element in parsed_xml:
             # Starting a table
             if event == 'start' and f'{pref}table' == element.tag:
                 sheet = object()
@@ -78,6 +72,15 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 while element.getprevious() is not None:
                     del element.getparent()[0]
 
-    grouped = groupby(rows(), lambda row: (row[0], row[1]))
-    for (_, sheet_name), rows in grouped:
-        yield sheet_name, (row for (_, _, row) in rows)
+    def without_sheet_object(grouped_sheets_and_rows):
+        for (_, sheet_name), rows in grouped_sheets_and_rows:
+            yield sheet_name, (row for (_, _, row) in rows)
+
+    unzipped_member_files = stream_unzip(ods_chunks)
+    content_xml_chunks = get_member_file(b'content.xml', unzipped_member_files)
+    content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
+    content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
+    sheets_and_rows = get_sheets_and_rows(content_xml_parsed)
+    grouped_sheets_and_rows = groupby(sheets_and_rows, lambda row: (row[0], row[1]))
+
+    yield from without_sheet_object(grouped_sheets_and_rows)
