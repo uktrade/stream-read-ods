@@ -6,6 +6,8 @@ from stream_unzip import stream_unzip
 
 def stream_read_ods(ods_chunks, chunk_size=65536):
 
+    # lxml iterparse takes a file-like object, but stream_read_ods accepts an iterable
+    # so we have to do some low-ish level faffing to convert from one to the other
     def to_file_like_obj(bytes_iter):
         chunk = b''
         offset = 0
