@@ -49,11 +49,11 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
     doc = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
 
-    sheet = None
-    sheet_name = None
-
-    pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
     def rows():
+        pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+        sheet = None
+        sheet_name = None
+
         for event, element in doc:
             # Starting a table
             if event == 'start' and f'{pref}table' == element.tag:
