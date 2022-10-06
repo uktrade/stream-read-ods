@@ -90,7 +90,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         for (_, sheet_name), rows in grouped_sheets_and_rows:
             yield sheet_name, (row for (_, _, row) in rows)
 
-    unzipped_member_files = stream_unzip(ods_chunks)
+    unzipped_member_files = stream_unzip(ods_chunks, chunk_size=chunk_size)
     content_xml_chunks = get_member_file(b'content.xml', unzipped_member_files)
     content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
     content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
