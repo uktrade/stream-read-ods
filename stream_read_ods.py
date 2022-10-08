@@ -81,11 +81,11 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 return \
                     None if value_type is None else \
                     parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
+                    parse_currency(cell_element.attrib[f'{ns_office}value']) if value_type == 'currency' else \
                     parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
-                    parse_time(cell_element.attrib[f'{ns_office}time-value']) if value_type == 'time' else \
                     parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
                     parse_percentage(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
-                    parse_currency(cell_element.attrib[f'{ns_office}value']) if value_type == 'currency' else \
+                    parse_time(cell_element.attrib[f'{ns_office}time-value']) if value_type == 'time' else \
                     value_error(value_type)
 
             # Strings can be from an attribute...
@@ -102,26 +102,26 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         def value_error(message):
             raise ValueError(message)
 
-        def parse_float(value):
-            return Decimal(value)
-
-        def parse_percentage(value):
-            return Percentage(value)
-
-        def parse_currency(value):
-            return Currency(value)
-
         def parse_boolean(value):
             return \
                 True if value == 'true' else \
                 False if value == 'false' else \
                 value_error(value)
 
+        def parse_currency(value):
+            return Currency(value)
+
         def parse_date(value):
             try:
                 return date.fromisoformat(value)
             except ValueError:
                 return datetime.fromisoformat(value)
+
+        def parse_float(value):
+            return Decimal(value)
+
+        def parse_percentage(value):
+            return Percentage(value)
 
         def parse_time(value):
             return value
