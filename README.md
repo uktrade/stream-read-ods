@@ -34,16 +34,17 @@ for name, rows in stream_read_ods(ods_chunks()):
 
 There are [8 possible data types in an Open Document Spreadsheet](https://docs.oasis-open.org/office/v1.2/os/OpenDocument-v1.2-os-part1.html#attribute-office_value-type): boolean, currency, date, float, percentage, string, time, and void. 4 of these can be output by stream-read-ods, chosen automatically according to the following table.
 
-| ODS type    | Python type                |
-|:------------|:---------------------------|
-| boolean     | bool                       |
-| currency    | stream_read_ods.Currency   |
-| date        | date or datetime           |
-| float       | Decimal                    |
-| percentage  | stream_read_ods.Percentage |
-| string      | str                        |
-| time        | stream_read_ods.Time       |
-| void        | NoneType                   |
+| ODS type    | Python type                                              |
+|:------------|:---------------------------------------------------------|
+| boolean     | bool                                                     |
+| currency    | [stream_read_ods.Currency](#stream_read_odscurrency)     |
+| date        | date or datetime                                         |
+| float       | Decimal                                                  |
+| percentage  | [stream_read_ods.Percentage](#stream_read_odspercentage) |
+| string      | str                                                      |
+| time        | [stream_read_ods.Time](#stream_read_odstime)             |
+| void        | NoneType                                                 |
+
 
 ### stream_read_ods.Currency
 
