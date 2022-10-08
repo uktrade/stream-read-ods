@@ -85,7 +85,15 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         # The name of the sheet (exposed in the API)
         sheet_name = None
 
-        for event, element in parsed_xml:
+        # We use manual iteration to be able to delegate iterating
+        parsed_xml_it = iter(parsed_xml)
+
+        while True:
+            try:
+                event, element = next(parsed_xml_it)
+            except StopIteration:
+                break
+
             # Starting a table
             if event == 'start' and f'{ns_table}table' == element.tag:
                 sheet = object()
