@@ -14,6 +14,8 @@ pip install stream-read-ods
 
 ## Usage
 
+To extract the rows you must use the `stream_read_ods` function, passing it an iterable of `bytes` instances, and it will return an iterable of `(sheet_name, sheet_rows)` pairs.
+
 ```python
 from stream_read_ods import stream_read_ods
 import httpx
@@ -23,11 +25,23 @@ def ods_chunks():
     with httpx.stream('GET', 'https://www.example.com/my.ods') as r:
         yield from r.iter_bytes(chunk_size=65536)
 
-for name, rows in stream_read_ods(ods_chunks()):
-    print(name)  # Sheet name
-    for row in rows:
+for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
+    for sheet_row in sheet_rows:
         print(row)  # Tuple of cells
 ```
+
+If the spreadsheet is of a fairly simple structure, then the `sheet_rows` from above can be passed to the `simple_table` function to extract named `columns` and the rows of data.
+
+```python
+
+from stream_read_ods import stream_read_ods, simple_table
+
+for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
+    table_columns, table_rows = simple_table(sheet_rows, skip_rows=2)
+    for table_row in table_rows:
+        print(table_row)  # Tuple of cells
+```
+
 
 
 ## Types

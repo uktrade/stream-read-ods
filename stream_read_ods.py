@@ -168,6 +168,31 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
     yield from get_sheets_and_rows(content_xml_parsed)
 
 
+def simple_table(rows, skip_rows=0):
+    def up_to_first_none(values):
+        vals = []
+        for value in values:
+            if value is None:
+                break
+            vals.append(value)
+        return tuple(vals)
+
+    def remaining_rows(width):
+        for row in rows:
+            remaining = max(0, width - len(row))
+            row = row[:width] + (None,) * remaining
+            if all((val is None) for val in row):
+                break
+            yield row
+
+    for i, row in enumerate(rows):
+        if i < skip_rows:
+            pass
+        if i == skip_rows:
+            header_row = up_to_first_none(row)
+            return header_row, remaining_rows(width=len(header_row))
+
+
 class Percentage(Decimal):
     pass
 

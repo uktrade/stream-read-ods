@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from stream_write_ods import stream_write_ods
-from stream_read_ods import Currency, Percentage, Time, stream_read_ods
+from stream_read_ods import Currency, Percentage, Time, stream_read_ods, simple_table
 
 
 def test_stream_write_ods():
@@ -30,6 +30,35 @@ def test_stream_write_ods():
             (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
         ]),
         ('Sheet 2 name', [('col_1_name',), ('col_1_value',)]),
+    ]
+
+    ods_chunks = stream_write_ods(get_sheets())
+
+    def tables():
+        for name, rows in stream_read_ods(ods_chunks):
+            table_columns, table_rows = simple_table(rows, skip_rows=0)
+            yield name, table_columns, table_rows
+
+    tables = [
+        (name, columns, list(rows))
+        for name, columns, rows in tables()
+    ]
+    assert tables == [
+        (
+            'Sheet 1 name',
+            ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'),
+            [
+                ('Value A', None, True, False),
+                (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
+            ],
+        ),
+        (
+            'Sheet 2 name',
+            ('col_1_name',),
+            [
+                ('col_1_value',)
+            ]
+        ),
     ]
 
 
