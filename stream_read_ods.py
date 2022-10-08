@@ -91,7 +91,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             if attribute_string_value is not None:
                 return attribute_string_value
 
-            # ... but otherwise extract from conten
+            # ... but otherwise extract from contents
             while True:
                 try:
                     event, element = next(parsed_xml_it)
