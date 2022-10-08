@@ -3,7 +3,7 @@ from stream_write_ods import stream_write_ods
 from stream_read_ods import stream_read_ods
 
 
-def test_sheets():
+def test_stream_write_ods():
     def get_sheets():
         def get_rows_of_sheet_1():
             yield 'Value A', None, True, False
