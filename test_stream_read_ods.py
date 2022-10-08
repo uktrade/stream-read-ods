@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
 from stream_write_ods import stream_write_ods
-from stream_read_ods import Percentage, stream_read_ods
+from stream_read_ods import Currency, Percentage, stream_read_ods
 
 
 def test_stream_write_ods():
@@ -48,8 +48,8 @@ def test_excel_export():
     ]
     assert files == [
         ('First', [
-            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Empty', None),
-            (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, Percentage('0.5'), '🍰', None),
+            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Money', 'Empty', None),
+            (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, Percentage('0.5'), '🍰', Currency('1.23'), None),
             (None, ),
         ]),
         ('Second', [
