@@ -52,10 +52,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             row = None
 
             while True:
-                try:
-                    event, element = next(parsed_xml_it)
-                except StopIteration:
-                    return
+                event, element = next(parsed_xml_it)
 
                 # Starting a row
                 if event == 'start' and f'{ns_table}table-row' == element.tag:
