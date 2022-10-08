@@ -76,13 +76,17 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         def table_cell(parsed_xml_it, element):
             value_type = element.attrib.get(f'{ns_office}value-type')
-            return \
-                None if value_type is None else \
-                parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
-                parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
-                parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
-                '' if value_type == 'string' else \
-                value_error()
+
+            if value_type != 'string':
+                return \
+                    None if value_type is None else \
+                    parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
+                    parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
+                    parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
+                    value_error()
+            
+            return ''
+
 
         def value_error():
             raise ValueError()
