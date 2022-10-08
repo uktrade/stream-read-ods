@@ -45,6 +45,30 @@ There are [8 possible data types in an Open Document Spreadsheet](https://docs.o
 | time        | stream_read_ods.Time       |
 | void        | NoneType                   |
 
+### stream_read_ods.Currency
+
+A subclass of Decimal.
+
+### stream_read_ods.Percentage
+
+A subclass of Decimal.
+
+### stream_read_ods.Time
+
+The Python built-in timedelta type is not used since timedelta does not offer a way to store intervals of years or months, other than converting to days which would be a loss of information.
+
+Instead, a [namedtuple](https://docs.python.org/3/library/collections.html#collections.namedtuple) is defined, stream_read_ods.Time, with members:
+
+| Member  | Type    |
+|:--------|:--------|
+| sign    | str     |
+| years   | int     |
+| months  | int     |
+| days    | int     |
+| hours   | int     |
+| minutes | int     |
+| seconds | Decimal |
+
 
 ## Running tests
 
