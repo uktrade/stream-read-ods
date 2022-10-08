@@ -54,7 +54,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         #
         # The name of the sheet is not used since sheets can have identical names
 
-        pref = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+        ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
 
         # A sentinal per sheet, to be able to groupby
         sheet = None
@@ -64,20 +64,20 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         for event, element in parsed_xml:
             # Starting a table
-            if event == 'start' and f'{pref}table' == element.tag:
+            if event == 'start' and f'{ns_table}table' == element.tag:
                 sheet = object()
-                sheet_name = element.attrib[f'{pref}name']
+                sheet_name = element.attrib[f'{ns_table}name']
 
             # Starting a row
-            if event == 'start' and f'{pref}table-row' == element.tag:
+            if event == 'start' and f'{ns_table}table-row' == element.tag:
                 row = []
 
             # Ending a row
-            if event == 'end' and f'{pref}table-row' == element.tag:
+            if event == 'end' and f'{ns_table}table-row' == element.tag:
                 yield sheet, sheet_name, tuple(row)
 
             # Starting a table cell
-            if event == 'start' and f'{pref}table-cell' == element.tag:
+            if event == 'start' and f'{ns_table}table-cell' == element.tag:
                 row.append('')
 
             # Reduce memory usage
