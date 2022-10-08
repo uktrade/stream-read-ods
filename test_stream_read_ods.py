@@ -14,6 +14,7 @@ def test_stream_write_ods():
 
         def get_rows_of_sheet_2():
             yield 'col_1_value',
+            yield None,
 
         yield 'Sheet 2 name', ('col_1_name',), get_rows_of_sheet_2()
 
@@ -29,7 +30,7 @@ def test_stream_write_ods():
             ('Value A', None, True, False),
             (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
         ]),
-        ('Sheet 2 name', [('col_1_name',), ('col_1_value',)]),
+        ('Sheet 2 name', [('col_1_name',), ('col_1_value',), (None,)]),
     ]
 
     ods_chunks = stream_write_ods(get_sheets())
