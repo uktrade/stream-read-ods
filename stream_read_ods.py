@@ -98,7 +98,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 except StopIteration:
                     break
 
-                if event == 'end' and element == cell_element:
+                if event == 'end' and element is cell_element:
                     return ''.join(cell_element.itertext())
 
         def value_error():
