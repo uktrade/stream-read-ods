@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from itertools import groupby
 
 from lxml import etree
@@ -54,7 +55,29 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         #
         # The name of the sheet is not used since sheets can have identical names
 
+        def value_error():
+            raise ValueError()
+
+        def parse_float(value):
+            try:
+                return int(value)
+            except ValueError:
+                return float(value)
+
+        def parse_boolean(value):
+            return \
+                True if value == 'true' else \
+                False if value == 'false' else \
+                value_error()
+
+        def parse_date(value):
+            try:
+                return date.fromisoformat(value)
+            except ValueError:
+                return datetime.fromisoformat(value)
+
         ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+        ns_office = '{urn:oasis:names:tc:opendocument:xmlns:office:1.0}'
 
         # A sentinal per sheet, to be able to groupby
         sheet = None
@@ -78,7 +101,15 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
             # Starting a table cell
             if event == 'start' and f'{ns_table}table-cell' == element.tag:
-                row.append('')
+                value_type = element.attrib.get(f'{ns_office}value-type')
+                row.append(
+                    None if value_type is None else \
+                    parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
+                    parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
+                    parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
+                    '' if value_type == 'string' else \
+                    value_error()
+                )
 
             # Reduce memory usage
             if event == 'end':
