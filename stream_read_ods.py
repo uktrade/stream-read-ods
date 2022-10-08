@@ -154,5 +154,6 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 class Percentage(Decimal):
     pass
 
+
 class Currency(Decimal):
     pass
