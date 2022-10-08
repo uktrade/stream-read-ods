@@ -36,11 +36,22 @@ If the spreadsheet is of a fairly simple structure, then the `sheet_rows` from a
 from stream_read_ods import stream_read_ods, simple_table
 
 for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
-    table_columns, table_rows = simple_table(sheet_rows, skip_rows=2)
-    for table_row in table_rows:
-        print(table_row)  # Tuple of cells
+    columns, rows = simple_table(sheet_rows, skip_rows=2)
+    for row in rows:
+        print(row)  # Tuple of cells
 ```
 
+This can be used to construct a Pandas dataframe from the ODS file (although this would store the entire sheet in memory)
+
+```python
+import pandas as pd
+from stream_read_ods import stream_read_ods, simple_table
+
+for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
+    columns, rows = simple_table(sheet_rows, skip_rows=2)
+    df = pd.DataFrame(rows, columns=columns)
+    print(df)
+```
 
 
 ## Types
