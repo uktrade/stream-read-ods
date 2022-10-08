@@ -66,6 +66,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 if event == 'start' and f'{ns_table}table-cell' == element.tag:
                     row.append(table_cell(parsed_xml_it, element))
 
+                # Ending the table
                 if event == 'end' and f'{ns_table}table' == element.tag:
                     return
 
