@@ -1,5 +1,7 @@
+from collections import namedtuple
 from datetime import date, datetime
 from decimal import Decimal
+import re
 
 from lxml import etree
 from stream_unzip import stream_unzip
@@ -46,6 +48,8 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
     def get_sheets_and_rows(parsed_xml):
 
+        # Thanks to https://stackoverflow.com/a/2765366/1319998
+        time_regex = re.compile(r'(?P<sign>-?)P(?:(?P<years>\d+)Y)?(?:(?P<months>\d+)M)?(?:(?P<days>\d+)D)?(?:T(?:(?P<hours>\d+)H)?(?:(?P<minutes>\d+)M)?(?:(?P<seconds>([0-9]*[.])?[0-9]+)S)?)?')
         ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
         ns_office = '{urn:oasis:names:tc:opendocument:xmlns:office:1.0}'
 
@@ -124,7 +128,16 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             return Percentage(value)
 
         def parse_time(value):
-            return value
+            time_dict = time_regex.match(value).groupdict(0)
+            return Time(
+                time_dict.get('sign') or '+',
+                int(time_dict.get('years', '0')),
+                int(time_dict.get('months', '0')),
+                int(time_dict.get('days', '0')),
+                int(time_dict.get('hours', '0')),
+                int(time_dict.get('minutes', '0')),
+                Decimal(time_dict.get('seconds', '0')),
+            )
 
         def clear_mem(event, element):
             if event == 'end':
@@ -161,3 +174,6 @@ class Percentage(Decimal):
 
 class Currency(Decimal):
     pass
+
+
+Time = namedtuple('Time', ('sign', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'), defaults=('+', 0, 0, 0, 0, Decimal('0')))
