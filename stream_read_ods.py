@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 
 from lxml import etree
 from stream_unzip import stream_unzip
@@ -100,10 +101,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             raise ValueError(message)
 
         def parse_float(value):
-            try:
-                return int(value)
-            except ValueError:
-                return float(value)
+            return Decimal(value)
 
         def parse_boolean(value):
             return \

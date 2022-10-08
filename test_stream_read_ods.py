@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from stream_write_ods import stream_write_ods
 from stream_read_ods import stream_read_ods
 
@@ -26,7 +27,7 @@ def test_stream_write_ods():
         ('Sheet 1 name', [
             ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'),
             ('Value A', None, True, False),
-            (1, 1.2, date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
+            (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
         ]),
         ('Sheet 2 name', [('col_1_name',), ('col_1_value',)]),
     ]
@@ -48,7 +49,7 @@ def test_excel_export():
     assert files == [
         ('First', [
             ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Empty', None),
-            (1, 4.56, datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, 0.5, '🍰', None),
+            (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, Decimal('0.5'), '🍰', None),
             (None, ),
         ]),
         ('Second', [
