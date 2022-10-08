@@ -30,7 +30,7 @@ for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
         print(row)  # Tuple of cells
 ```
 
-If the spreadsheet is of a fairly simple structure, then the `sheet_rows` from above can be passed to the `simple_table` function to extract named `columns` and the rows of data.
+If the spreadsheet is of a fairly simple structure, then the `sheet_rows` from above can be passed to the `simple_table` function to extract the names of the columns and the rows of the table.
 
 ```python
 
