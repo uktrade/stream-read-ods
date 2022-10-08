@@ -33,7 +33,6 @@ for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
 If the spreadsheet is of a fairly simple structure, then the `sheet_rows` from above can be passed to the `simple_table` function to extract the names of the columns and the rows of the table.
 
 ```python
-
 from stream_read_ods import stream_read_ods, simple_table
 
 for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
