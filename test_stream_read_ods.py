@@ -86,3 +86,27 @@ def test_excel_export():
             (None,),
         ]),
     ]
+
+    def tables():
+        for name, rows in stream_read_ods(get_ods_chunks()):
+            table_columns, table_rows = simple_table(rows, skip_rows=0)
+            yield name, table_columns, table_rows
+
+    tables = [
+        (name, columns, list(rows))
+        for name, columns, rows in tables()
+    ]
+    assert tables == [
+        (
+            'First',
+            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Money', 'Time', 'Empty'),
+            [
+                (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1, 0, 0), datetime(2001, 1, 1, 23, 23), False, True, Decimal('0.5'), '🍰', Decimal('1.23'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), None)
+            ]
+        ),
+        (
+            'Second',
+            (),
+            [],
+        ),
+    ]
