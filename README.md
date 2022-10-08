@@ -41,7 +41,7 @@ for sheet_name, sheet_rows in stream_read_ods(ods_chunks()):
         print(row)  # Tuple of cells
 ```
 
-This can be used to construct a Pandas dataframe from the ODS file (although this would store the entire sheet in memory).
+This can then be used to construct a Pandas dataframe from the ODS file (although this would store the entire sheet in memory).
 
 ```python
 import pandas as pd
