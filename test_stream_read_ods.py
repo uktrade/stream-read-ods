@@ -24,9 +24,9 @@ def test_sheets():
     ]
     assert files == [
         ('Sheet 1 name', [
-            ('', '', '', ''),
-            ('', None, True, False),
+            ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'),
+            ('Value A', None, True, False),
             (1, 1.2, date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
         ]),
-        ('Sheet 2 name', [('',), ('',)]),
+        ('Sheet 2 name', [('col_1_name',), ('col_1_value',)]),
     ]

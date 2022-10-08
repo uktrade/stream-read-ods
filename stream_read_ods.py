@@ -74,19 +74,32 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
                 clear_mem(event, element)
 
-        def table_cell(parsed_xml_it, element):
-            value_type = element.attrib.get(f'{ns_office}value-type')
+        def table_cell(parsed_xml_it, cell_element):
+            value_type = cell_element.attrib.get(f'{ns_office}value-type')
 
+            # Non-strings are always from attributes
             if value_type != 'string':
                 return \
                     None if value_type is None else \
-                    parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
-                    parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
-                    parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
+                    parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
+                    parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
+                    parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
                     value_error()
             
-            return ''
+            # Strings can be from an attribute...
+            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
+            if attribute_string_value is not None:
+                return attribute_string_value
 
+            # ... but otherwise extract from conten
+            while True:
+                try:
+                    event, element = next(parsed_xml_it)
+                except StopIteration:
+                    break
+
+                if event == 'end' and element == cell_element:
+                    return ''.join(cell_element.itertext())
 
         def value_error():
             raise ValueError()
