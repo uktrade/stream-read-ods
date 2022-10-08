@@ -36,7 +36,7 @@ There are [8 possible data types in an Open Document Spreadsheet](https://docs.o
 
 | ODS type    | Python type                |
 |:------------|:---------------------------|
-| boolean     | boolean                    |
+| boolean     | bool                       |
 | currency    | stream_read_ods.Currency   |
 | date        | date or datetime           |
 | float       | Decimal                    |
