@@ -82,7 +82,8 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                     parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
                     parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
                     parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
-                    value_error()
+                    parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
+                    value_error(value_type)
 
             # Strings can be from an attribute...
             attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
@@ -95,8 +96,8 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 if event == 'end' and element is cell_element:
                     return ''.join(cell_element.itertext())
 
-        def value_error():
-            raise ValueError()
+        def value_error(message):
+            raise ValueError(message)
 
         def parse_float(value):
             try:
@@ -108,7 +109,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             return \
                 True if value == 'true' else \
                 False if value == 'false' else \
-                value_error()
+                value_error(value)
 
         def parse_date(value):
             try:

@@ -30,3 +30,28 @@ def test_stream_write_ods():
         ]),
         ('Sheet 2 name', [('col_1_name',), ('col_1_value',)]),
     ]
+
+
+def test_excel_export():
+    def get_ods_chunks():
+        with open('fixtures/excel.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [
+        ('First', [
+            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Empty', None),
+            (1, 4.56, datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, 0.5, '🍰', None),
+            (None, ),
+        ]),
+        ('Second', [
+            (None,),
+        ]),
+    ]
