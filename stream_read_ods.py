@@ -82,7 +82,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                     parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
                     parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
                     value_error()
-            
+
             # Strings can be from an attribute...
             attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
             if attribute_string_value is not None:
