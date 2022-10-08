@@ -91,7 +91,6 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             # ... but otherwise extract from contents
             while True:
                 event, element = next(parsed_xml_it)
-
                 if event == 'end' and element is cell_element:
                     return ''.join(cell_element.itertext())
 
