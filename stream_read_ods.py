@@ -83,7 +83,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                     parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
                     parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
                     parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
-                    parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
+                    parse_percentage(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
                     value_error(value_type)
 
             # Strings can be from an attribute...
@@ -102,6 +102,9 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         def parse_float(value):
             return Decimal(value)
+
+        def parse_percentage(value):
+            return Percentage(value)
 
         def parse_boolean(value):
             return \
@@ -142,3 +145,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
     content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
     content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
     yield from get_sheets_and_rows(content_xml_parsed)
+
+
+class Percentage(Decimal):
+    pass
