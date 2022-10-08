@@ -2,6 +2,8 @@
 
 Python function to extract data from an ODS spreadsheet on the fly - without having to store the entire file in memory or disk
 
+To construct ODS spreadsheets on the fly, try [stream-write-ods](https://github.com/uktrade/stream-write-ods).
+
 
 ## Installation
 
