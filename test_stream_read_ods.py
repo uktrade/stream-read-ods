@@ -48,8 +48,8 @@ def test_excel_export():
     ]
     assert files == [
         ('First', [
-            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Money', 'Empty', None),
-            (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, Percentage('0.5'), '🍰', Currency('1.23'), None),
+            ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Money', 'Time', 'Empty', None),
+            (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1), datetime(2001, 1, 1, 23, 23), False, True, Percentage('0.5'), '🍰', Currency('1.23'), 'PT1H23M0S', None),
             (None, ),
         ]),
         ('Second', [
