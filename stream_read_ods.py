@@ -48,6 +48,42 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
         ns_office = '{urn:oasis:names:tc:opendocument:xmlns:office:1.0}'
 
+        def table_rows(parsed_xml_it):
+            row = None
+
+            while True:
+                try:
+                    event, element = next(parsed_xml_it)
+                except StopIteration:
+                    return
+
+                # Starting a row
+                if event == 'start' and f'{ns_table}table-row' == element.tag:
+                    row = []
+
+                # Ending a row
+                if event == 'end' and f'{ns_table}table-row' == element.tag:
+                    yield tuple(row)
+
+                # Starting a table cell
+                if event == 'start' and f'{ns_table}table-cell' == element.tag:
+                    row.append(table_cell(parsed_xml_it, element))
+
+                if event == 'end' and f'{ns_table}table' == element.tag:
+                    return
+
+                clear_mem(event, element)
+
+        def table_cell(parsed_xml_it, element):
+            value_type = element.attrib.get(f'{ns_office}value-type')
+            return \
+                None if value_type is None else \
+                parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
+                parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
+                parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
+                '' if value_type == 'string' else \
+                value_error()
+
         def value_error():
             raise ValueError()
 
@@ -74,40 +110,6 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 element.clear()
                 while element.getprevious() is not None:
                     del element.getparent()[0]
-
-        def table_rows(parsed_xml_it):
-            row = None
-
-            while True:
-                try:
-                    event, element = next(parsed_xml_it)
-                except StopIteration:
-                    return
-
-                # Starting a row
-                if event == 'start' and f'{ns_table}table-row' == element.tag:
-                    row = []
-
-                # Ending a row
-                if event == 'end' and f'{ns_table}table-row' == element.tag:
-                    yield tuple(row)
-
-                # Starting a table cell
-                if event == 'start' and f'{ns_table}table-cell' == element.tag:
-                    value_type = element.attrib.get(f'{ns_office}value-type')
-                    row.append(
-                        None if value_type is None else \
-                        parse_boolean(element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
-                        parse_date(element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
-                        parse_float(element.attrib[f'{ns_office}value']) if value_type == 'float' else \
-                        '' if value_type == 'string' else \
-                        value_error()
-                    )
-
-                if event == 'end' and f'{ns_table}table' == element.tag:
-                    return
-
-                clear_mem(event, element)
 
         # We use manual iteration to be able to delegate iterating
         parsed_xml_it = iter(parsed_xml)
