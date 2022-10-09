@@ -100,3 +100,34 @@ Instead, a [namedtuple](https://docs.python.org/3/library/collections.html#colle
 pip install -r requirements-dev.txt
 pytest
 ```
+
+## Exceptions
+
+Exceptions raised by the source iterable are passed through `stream_read_ods` unchanged. Other exceptions are in the `stream_read_ods` module, and derive from its `StreamReadODSError`.
+
+
+## Exception hierarchy
+
+  - **StreamReadODSError**
+
+    Base class for all explicitly-thrown exceptions
+
+    - **InvalidODSFileError** (also inherits from the **ValueError** built-in)
+
+      Base class for errors relating to the bytes of the ODS file not being parsable. Several errors relate to the fact that ODS files are ZIP archives that require specific members and contents.
+
+      - **UnzipError**
+
+        The ODS file does not appear to be a valid ZIP file. More detail is in the `__cause__` member of the raised exception.
+
+      - **MissingMIMETypeError**
+
+        The MIME type of the file was not present. In ZIP terms, this means that the first file of the ZIP archive is not named `mimetype`.
+
+      - **IncorrectMIMETypeError**
+
+        The MIME type was present, but does not match `application/vnd.oasis.opendocument.spreadsheet`. The can happen if an Open Document Text (ODT) file is passed rather than an ODS file.
+
+      - **MissingContentXMLError**
+
+        The file claims to be an ODS file according to its MIME type, but does not contain the requires `content.xml` file that contains the sheet data.
