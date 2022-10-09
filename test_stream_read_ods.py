@@ -112,7 +112,7 @@ def test_excel_export():
     ]
 
 
-def test_excel_export():
+def test_libreoffice_export():
     def get_ods_chunks():
         with open('fixtures/libreoffice.ods', 'rb') as f:
             while True:
