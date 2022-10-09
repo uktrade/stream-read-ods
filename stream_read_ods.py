@@ -4,7 +4,7 @@ from decimal import Decimal
 import re
 
 from lxml import etree
-from stream_unzip import stream_unzip
+from stream_unzip import UnzipError as StreamUnzipError, stream_unzip
 
 
 def stream_read_ods(ods_chunks, chunk_size=65536):
@@ -38,13 +38,33 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         return FileLikeObj()
 
-    def get_member_file(single_file_name, unzipped_files):
-        for name, size, chunks in unzipped_files:
-            if name != single_file_name:
+    def validate_mimetype_and_get_content(unzipped_files):
+        correct_mimetype = b'application/vnd.oasis.opendocument.spreadsheet'
+
+        for i, (name, size, chunks) in enumerate(unzipped_files):
+            if i == 0 and name != b'mimetype':
+                raise MissingMIMETypeError()
+
+            if i == 0 and name == b'mimetype':
+                mimetype = b''
+                chunks_it = iter(chunks)
+                while len(mimetype) < len(correct_mimetype):
+                    try:
+                        mimetype += next(chunks_it)
+                    except StopIteration:
+                        break
+                if mimetype != correct_mimetype:
+                    raise IncorrectMIMETypeError(mimetype.decode("utf-8"))
+
+            if name != b'content.xml':
                 for chunk in chunks:
                     pass
                 continue
+
             yield from chunks
+            break
+        else:
+            raise MissingContentXMLError()
 
     def get_sheets_and_rows(parsed_xml):
 
@@ -164,10 +184,14 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             clear_mem(event, element)
 
     unzipped_member_files = stream_unzip(ods_chunks, chunk_size=chunk_size)
-    content_xml_chunks = get_member_file(b'content.xml', unzipped_member_files)
+    content_xml_chunks = validate_mimetype_and_get_content(unzipped_member_files)
     content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
     content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
-    yield from get_sheets_and_rows(content_xml_parsed)
+
+    try:
+        yield from get_sheets_and_rows(content_xml_parsed)
+    except StreamUnzipError as e:
+        raise UnzipError() from e
 
 
 def simple_table(rows, skip_rows=0):
@@ -211,3 +235,27 @@ class Currency(Decimal):
 
 
 Time = namedtuple('Time', ('sign', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'), defaults=('+', 0, 0, 0, 0, Decimal('0')))
+
+
+class StreamReadODSError(Exception):
+    pass
+
+
+class InvalidODSFileError(StreamReadODSError, ValueError):
+    pass
+
+
+class UnzipError(InvalidODSFileError):
+    pass
+
+
+class MissingMIMETypeError(InvalidODSFileError):
+    pass
+
+
+class IncorrectMIMETypeError(InvalidODSFileError):
+    pass
+
+
+class MissingContentXMLError(InvalidODSFileError):
+    pass

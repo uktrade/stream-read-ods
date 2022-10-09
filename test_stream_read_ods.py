@@ -1,7 +1,20 @@
 from datetime import date, datetime
 from decimal import Decimal
+import pytest
 from stream_write_ods import stream_write_ods
-from stream_read_ods import Currency, Percentage, Time, stream_read_ods, simple_table
+
+from stream_read_ods import (
+    Currency,
+    Percentage,
+    Time,
+    UnzipError,
+    MissingMIMETypeError,
+    IncorrectMIMETypeError,
+    MissingContentXMLError,
+    stream_read_ods,
+    simple_table,
+)
+from stream_zip import NO_COMPRESSION_32, stream_zip
 
 
 def test_stream_write_ods():
@@ -150,3 +163,72 @@ def test_libreoffice_export():
             ]
         ),
     ]
+
+
+def test_libreoffice_doc():
+    def get_chunks():
+        with open('fixtures/doc.odt', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    with pytest.raises(IncorrectMIMETypeError):
+        next(stream_read_ods(get_chunks()))
+
+
+def test_zip_without_mimetype():
+
+    def unzipped_files():
+        modified_at = datetime.now()
+        perms = 0o600
+
+        def file_1_data():
+            yield b'Some bytes 1'
+
+        yield 'my-file-1.txt', modified_at, perms, NO_COMPRESSION_32, file_1_data()
+
+
+    with pytest.raises(MissingMIMETypeError):
+        next(stream_read_ods(stream_zip(unzipped_files())))
+
+
+def test_zip_incorrect_mimetype_error():
+
+    def unzipped_files():
+        modified_at = datetime.now()
+        perms = 0o600
+
+        def file_1_data():
+            yield b'application/vnd.oasis.opendocument.spreadsheetXX'
+
+        yield 'mimetype', modified_at, perms, NO_COMPRESSION_32, file_1_data()
+
+    with pytest.raises(IncorrectMIMETypeError):
+        next(stream_read_ods(stream_zip(unzipped_files())))
+
+
+def test_zip_no_context_xml():
+
+    def unzipped_files():
+        modified_at = datetime.now()
+        perms = 0o600
+
+        def file_1_data():
+            yield b'application/vnd.oasis.opendocument.spreadsheet'
+
+        yield 'mimetype', modified_at, perms, NO_COMPRESSION_32, file_1_data()
+
+
+    with pytest.raises(MissingContentXMLError):
+        next(stream_read_ods(stream_zip(unzipped_files())))
+
+
+def test_not_zip():
+
+    def junk():
+        yield b'Not a zip' * 1000
+
+    with pytest.raises(UnzipError):
+        next(stream_read_ods(junk()))
