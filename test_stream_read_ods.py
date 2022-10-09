@@ -101,7 +101,7 @@ def test_excel_export():
             'First',
             ('Integer', 'float', 'Date', 'Datetime', False, True, 'Percentage', 'String', 'Money', 'Time', 'Empty'),
             [
-                (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1, 0, 0), datetime(2001, 1, 1, 23, 23), False, True, Decimal('0.5'), '🍰', Decimal('1.23'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), None)
+                (Decimal('1'), Decimal('4.5599999999999996'), datetime(2002, 1, 1, 0, 0), datetime(2001, 1, 1, 23, 23), False, True, Decimal('0.5'), '🍰', Currency('1.23'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), None)
             ]
         ),
         (
@@ -128,7 +128,7 @@ def test_libreoffice_export():
     assert files == [
         ('Sheet1', [
             ('integer', 'float', 'date', 'datetime', 'bool false', 'bool true', 'percentage', 'money', 'time', 'string', 'empty'),
-            (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
+            (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34', code='GBP'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
         ]),
     ]
 
@@ -146,7 +146,7 @@ def test_libreoffice_export():
             'Sheet1',
             ('integer', 'float', 'date', 'datetime', 'bool false', 'bool true', 'percentage', 'money', 'time', 'string', 'empty'),
             [
-                (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
+                (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34', code='GBP'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
             ]
         ),
     ]

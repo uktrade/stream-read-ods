@@ -69,10 +69,9 @@ There are [8 possible data types in an Open Document Spreadsheet](https://docs.o
 | time        | [stream_read_ods.Time](#stream_read_odstime)             |
 | void        | NoneType                                                 |
 
-
 ### stream_read_ods.Currency
 
-A subclass of Decimal.
+A subclass of Decimal with an additional attribute `code` that contains the currency code, for example the string `GBP`. This can be `None` if the ODS file does not specify a code.
 
 ### stream_read_ods.Percentage
 

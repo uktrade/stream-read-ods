@@ -85,7 +85,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 return \
                     None if value_type is None else \
                     parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
-                    parse_currency(cell_element.attrib[f'{ns_office}value']) if value_type == 'currency' else \
+                    parse_currency(cell_element, cell_element.attrib[f'{ns_office}value']) if value_type == 'currency' else \
                     parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
                     parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
                     parse_percentage(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
@@ -112,8 +112,8 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
                 False if value == 'false' else \
                 value_error(value)
 
-        def parse_currency(value):
-            return Currency(value)
+        def parse_currency(cell_element, value):
+            return Currency(value, code=cell_element.attrib.get(f'{ns_office}currency'))
 
         def parse_date(value):
             try:
@@ -198,7 +198,16 @@ class Percentage(Decimal):
 
 
 class Currency(Decimal):
-    pass
+    def __new__(cls, value='0', context=None, code=None):
+        instance = super().__new__(cls, value, context)
+        instance.code = code
+        return instance
+
+    def __eq__(self, other):
+        return \
+            isinstance(other, self.__class__) \
+            and super().__eq__(other) \
+            and self.code == other.code
 
 
 Time = namedtuple('Time', ('sign', 'years', 'months', 'days', 'hours', 'minutes', 'seconds'), defaults=('+', 0, 0, 0, 0, Decimal('0')))
