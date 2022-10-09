@@ -7,6 +7,7 @@ from stream_read_ods import (
     Currency,
     Percentage,
     Time,
+    UnfinishedIterationError,
     UnzipError,
     MissingMIMETypeError,
     IncorrectMIMETypeError,
@@ -74,6 +75,13 @@ def test_stream_write_ods():
             ]
         ),
     ]
+
+    ods_chunks = stream_write_ods(get_sheets())
+    sheets = stream_read_ods(ods_chunks)
+    sheets_it = iter(sheets)
+    sheet, rows = next(sheets_it)
+    with pytest.raises(UnfinishedIterationError):
+        next(sheets_it)
 
 
 def test_excel_export():

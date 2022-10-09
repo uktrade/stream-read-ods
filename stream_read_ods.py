@@ -179,7 +179,10 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             # Starting a table
             if event == 'start' and f'{ns_table}table' == element.tag:
                 sheet_name = element.attrib[f'{ns_table}name']
-                yield sheet_name, table_rows(parsed_xml_it)
+                rows = table_rows(parsed_xml_it)
+                yield sheet_name, rows
+                for _ in rows:
+                    raise UnfinishedIterationError()
 
             clear_mem(event, element)
 
@@ -238,6 +241,14 @@ Time = namedtuple('Time', ('sign', 'years', 'months', 'days', 'hours', 'minutes'
 
 
 class StreamReadODSError(Exception):
+    pass
+
+
+class InvalidOperationError(StreamReadODSError):
+    pass
+
+
+class UnfinishedIterationError(InvalidOperationError):
     pass
 
 

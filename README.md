@@ -112,6 +112,12 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
     Base class for all explicitly-thrown exceptions
 
+    - **InvalidOperationError**
+
+      - **UnfinishedIterationError**
+
+        The rows iterator of a sheet has not been iterated to completion
+
     - **InvalidODSFileError** (also inherits from the **ValueError** built-in)
 
       Base class for errors relating to the bytes of the ODS file not being parsable. Several errors relate to the fact that ODS files are ZIP archives that require specific members and contents.
