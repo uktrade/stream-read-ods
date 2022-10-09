@@ -4,7 +4,7 @@ from decimal import Decimal
 import re
 
 from lxml import etree
-from stream_unzip import UnzipError as StreamUnzipError, stream_unzip
+from stream_unzip import UnzipValueError, stream_unzip
 
 
 def stream_read_ods(ods_chunks, chunk_size=65536):
@@ -193,7 +193,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
     try:
         yield from get_sheets_and_rows(content_xml_parsed)
-    except StreamUnzipError as e:
+    except UnzipValueError as e:
         raise UnzipError() from e
 
 
