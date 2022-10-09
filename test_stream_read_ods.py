@@ -110,3 +110,43 @@ def test_excel_export():
             [],
         ),
     ]
+
+
+def test_excel_export():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [
+        ('Sheet1', [
+            ('integer', 'float', 'date', 'datetime', 'bool false', 'bool true', 'percentage', 'money', 'time', 'string', 'empty'),
+            (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
+        ]),
+    ]
+
+    def tables():
+        for name, rows in stream_read_ods(get_ods_chunks()):
+            table_columns, table_rows = simple_table(rows, skip_rows=0)
+            yield name, table_columns, table_rows
+
+    tables = [
+        (name, columns, list(rows))
+        for name, columns, rows in tables()
+    ]
+    assert tables == [
+        (
+            'Sheet1',
+            ('integer', 'float', 'date', 'datetime', 'bool false', 'bool true', 'percentage', 'money', 'time', 'string', 'empty'),
+            [
+                (Decimal('1'), Decimal('4.56'), date(2012, 1, 1), datetime(2012, 1, 1, 1, 12, 23), False, True, Percentage('0.5'), Currency('2.34'), Time(sign='+', years=0, months=0, days=0, hours=1, minutes=23, seconds=Decimal('0')), '🍰', None),
+            ]
+        ),
+    ]
