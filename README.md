@@ -126,7 +126,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
       - **IncorrectMIMETypeError**
 
-        The MIME type was present, but does not match `application/vnd.oasis.opendocument.spreadsheet`. The can happen if an Open Document Text (ODT) file is passed rather than an ODS file.
+        The MIME type was present, but does not match `application/vnd.oasis.opendocument.spreadsheet`. The can happen if a file such as an Open Document Text (ODT) file is passed rather than an ODS file.
 
       - **MissingContentXMLError**
 
