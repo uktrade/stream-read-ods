@@ -84,12 +84,12 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             if value_type != 'string':
                 return \
                     None if value_type is None else \
-                    parse_boolean(cell_element.attrib[f'{ns_office}boolean-value']) if value_type == 'boolean' else \
-                    parse_currency(cell_element, cell_element.attrib[f'{ns_office}value']) if value_type == 'currency' else \
-                    parse_date(cell_element.attrib[f'{ns_office}date-value']) if value_type == 'date' else \
-                    parse_float(cell_element.attrib[f'{ns_office}value']) if value_type == 'float' else \
-                    parse_percentage(cell_element.attrib[f'{ns_office}value']) if value_type == 'percentage' else \
-                    parse_time(cell_element.attrib[f'{ns_office}time-value']) if value_type == 'time' else \
+                    parse_boolean(cell_element) if value_type == 'boolean' else \
+                    parse_currency(cell_element) if value_type == 'currency' else \
+                    parse_date(cell_element) if value_type == 'date' else \
+                    parse_float(cell_element) if value_type == 'float' else \
+                    parse_percentage(cell_element) if value_type == 'percentage' else \
+                    parse_time(cell_element) if value_type == 'time' else \
                     value_error(value_type)
 
             # Strings can be from an attribute...
@@ -106,29 +106,31 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         def value_error(message):
             raise ValueError(message)
 
-        def parse_boolean(value):
+        def parse_boolean(cell_element):
+            value = cell_element.attrib[f'{ns_office}boolean-value']
             return \
                 True if value == 'true' else \
                 False if value == 'false' else \
                 value_error(value)
 
-        def parse_currency(cell_element, value):
-            return Currency(value, code=cell_element.attrib.get(f'{ns_office}currency'))
+        def parse_currency(cell_element):
+            return Currency(cell_element.attrib[f'{ns_office}value'], code=cell_element.attrib.get(f'{ns_office}currency'))
 
-        def parse_date(value):
+        def parse_date(cell_element):
+            value = cell_element.attrib[f'{ns_office}date-value']
             try:
                 return date.fromisoformat(value)
             except ValueError:
                 return datetime.fromisoformat(value)
 
-        def parse_float(value):
-            return Decimal(value)
+        def parse_float(cell_element):
+            return Decimal(cell_element.attrib[f'{ns_office}value'])
 
-        def parse_percentage(value):
-            return Percentage(value)
+        def parse_percentage(cell_element):
+            return Percentage(cell_element.attrib[f'{ns_office}value'])
 
-        def parse_time(value):
-            time_dict = time_regex.match(value).groupdict(0)
+        def parse_time(cell_element):
+            time_dict = time_regex.match(cell_element.attrib[f'{ns_office}time-value']).groupdict(0)
             return Time(
                 time_dict.get('sign') or '+',
                 int(time_dict.get('years', '0')),
