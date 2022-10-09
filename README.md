@@ -124,7 +124,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
       - **UnzipError**
 
-        The ODS file does not appear to be a valid ZIP file. More detail is in the `__cause__` member of the raised exception.
+        The ODS file does not appear to be a valid ZIP file. More detail is in the `__cause__` member of the raised exception, which is an exception that derives from [`UnzipValueError` in stream-unzip](https://github.com/uktrade/stream-unzip#exception-hierarchy).
 
       - **MissingMIMETypeError**
 
