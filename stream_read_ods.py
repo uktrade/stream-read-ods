@@ -188,8 +188,6 @@ def simple_table(rows, skip_rows=0):
             yield row
 
     for i, row in enumerate(rows):
-        if i < skip_rows:
-            pass
         if i == skip_rows:
             header_row = up_to_first_none(row)
             return header_row, remaining_rows(width=len(header_row))
