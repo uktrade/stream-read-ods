@@ -136,7 +136,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
       - **MissingContentXMLError**
 
-        The file claims to be an ODS file according to its MIME type, but does not contain the requires `content.xml` file that contains the sheet data.
+        The file claims to be an ODS file according to its MIME type, but does not contain the required `content.xml` file that contains the sheet data.
 
       - **InvalidContentXMLError**
 
