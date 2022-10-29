@@ -73,11 +73,17 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
         ns_office = '{urn:oasis:names:tc:opendocument:xmlns:office:1.0}'
 
+        def _next(it):
+            try:
+                return next(it)
+            except etree.LxmlError as e:
+                raise InvalidContentXMLError() from e
+
         def table_rows(parsed_xml_it):
             row = None
 
             while True:
-                event, element = next(parsed_xml_it)
+                event, element = _next(parsed_xml_it)
 
                 # Starting a row
                 if event == 'start' and f'{ns_table}table-row' == element.tag:
@@ -159,7 +165,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
            # ... but otherwise extract from contents
            while True:
-               event, element = next(parsed_xml_it)
+               event, element = _next(parsed_xml_it)
                if event == 'end' and element is cell_element:
                    return ''.join(cell_element.itertext())
 
@@ -191,7 +197,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         while True:
             try:
-                event, element = next(parsed_xml_it)
+                event, element = _next(parsed_xml_it)
             except StopIteration:
                 break
 
@@ -214,8 +220,6 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         yield from get_sheets_and_rows(content_xml_parsed)
     except UnzipValueError as e:
         raise UnzipError() from e
-    except etree.LxmlError as e:
-        raise InvalidContentXMLError() from e
 
 
 def simple_table(rows, skip_rows=0):
