@@ -137,3 +137,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
       - **MissingContentXMLError**
 
         The file claims to be an ODS file according to its MIME type, but does not contain the requires `content.xml` file that contains the sheet data.
+
+      - **InvalidContentXMLError**
+
+        The file claims to be an ODS file according to its MIME type, it contains a `content.xml` file, but it doesn't appear to contain valid XML. More detail is in the `__cause__` member of the raised exception, which is an exception that derives from [`lxml.etree.LxmlError`](https://lxml.de/api/lxml.etree.LxmlError-class.html)
