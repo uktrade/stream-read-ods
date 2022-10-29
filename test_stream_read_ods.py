@@ -12,10 +12,11 @@ from stream_read_ods import (
     MissingMIMETypeError,
     IncorrectMIMETypeError,
     MissingContentXMLError,
+    InvalidContentXMLError,
     stream_read_ods,
     simple_table,
 )
-from stream_zip import NO_COMPRESSION_32, stream_zip
+from stream_zip import ZIP_32, NO_COMPRESSION_32, stream_zip
 
 
 def test_stream_write_ods():
@@ -230,6 +231,27 @@ def test_zip_no_context_xml():
 
 
     with pytest.raises(MissingContentXMLError):
+        next(stream_read_ods(stream_zip(unzipped_files())))
+
+
+def test_zip_bad_xml():
+
+    def unzipped_files():
+        modified_at = datetime.now()
+        perms = 0o600
+
+        def file_1_data():
+            yield b'application/vnd.oasis.opendocument.spreadsheet'
+
+        yield 'mimetype', modified_at, perms, NO_COMPRESSION_32, file_1_data()
+
+        def file_2_data():
+            yield b'Not XML'
+
+        yield 'content.xml', modified_at, perms, ZIP_32, file_2_data()
+
+
+    with pytest.raises(InvalidContentXMLError):
         next(stream_read_ods(stream_zip(unzipped_files())))
 
 

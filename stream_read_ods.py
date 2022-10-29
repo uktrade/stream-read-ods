@@ -195,6 +195,8 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
         yield from get_sheets_and_rows(content_xml_parsed)
     except UnzipValueError as e:
         raise UnzipError() from e
+    except etree.LxmlError as e:
+        raise InvalidContentXMLError() from e
 
 
 def simple_table(rows, skip_rows=0):
@@ -269,4 +271,8 @@ class IncorrectMIMETypeError(InvalidODSFileError):
 
 
 class MissingContentXMLError(InvalidODSFileError):
+    pass
+
+
+class InvalidContentXMLError(InvalidODSFileError):
     pass
