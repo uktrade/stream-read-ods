@@ -152,7 +152,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
         - **InvalidValueError**
 
-        The value of a cell cannot be parsed as its declared type. More detail may be in the `__cause__` member of the raised exception.
+          The value of a cell cannot be parsed as its declared type. More detail may be in the `__cause__` member of the raised exception.
 
           - **InvalidBooleanValueError**
 
