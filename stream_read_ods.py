@@ -1,6 +1,6 @@
 from collections import namedtuple
 from datetime import date, datetime
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import re
 
 from lxml import etree
@@ -99,58 +99,77 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
         def table_cell(parsed_xml_it, cell_element):
             value_type = cell_element.attrib.get(f'{ns_office}value-type')
+            return \
+                None if value_type is None else \
+                parse_boolean(cell_element) if value_type == 'boolean' else \
+                parse_currency(cell_element) if value_type == 'currency' else \
+                parse_date(cell_element) if value_type == 'date' else \
+                parse_float(cell_element) if value_type == 'float' else \
+                parse_percentage(cell_element) if value_type == 'percentage' else \
+                parse_string(cell_element, parsed_xml_it) if value_type == 'string' else \
+                parse_time(cell_element) if value_type == 'time' else \
+                error(InvalidTypeError(value_type))
 
-            # Non-strings are always from attributes
-            if value_type != 'string':
-                return \
-                    None if value_type is None else \
-                    parse_boolean(cell_element) if value_type == 'boolean' else \
-                    parse_currency(cell_element) if value_type == 'currency' else \
-                    parse_date(cell_element) if value_type == 'date' else \
-                    parse_float(cell_element) if value_type == 'float' else \
-                    parse_percentage(cell_element) if value_type == 'percentage' else \
-                    parse_time(cell_element) if value_type == 'time' else \
-                    value_error(value_type)
-
-            # Strings can be from an attribute...
-            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
-            if attribute_string_value is not None:
-                return attribute_string_value
-
-            # ... but otherwise extract from contents
-            while True:
-                event, element = next(parsed_xml_it)
-                if event == 'end' and element is cell_element:
-                    return ''.join(cell_element.itertext())
-
-        def value_error(message):
-            raise ValueError(message)
+        def error(e):
+            raise e(message)
 
         def parse_boolean(cell_element):
             value = cell_element.attrib[f'{ns_office}boolean-value']
             return \
                 True if value == 'true' else \
                 False if value == 'false' else \
-                value_error(value)
+                error(InvalidBooleanValueError(value))
 
         def parse_currency(cell_element):
-            return Currency(cell_element.attrib[f'{ns_office}value'], code=cell_element.attrib.get(f'{ns_office}currency'))
+            value = cell_element.attrib[f'{ns_office}value']
+            try:
+                return Currency(value, code=cell_element.attrib.get(f'{ns_office}currency'))
+            except InvalidOperation as e:
+                raise InvalidCurrencyValueError(value) from e
 
         def parse_date(cell_element):
             value = cell_element.attrib[f'{ns_office}date-value']
             try:
-                return date.fromisoformat(value)
-            except ValueError:
-                return datetime.fromisoformat(value)
+                try:
+                    return date.fromisoformat(value)
+                except ValueError:
+                    return datetime.fromisoformat(value)
+            except ValueError as e:
+                raise InvalidDateValueError(value) from e
 
         def parse_float(cell_element):
-            return Decimal(cell_element.attrib[f'{ns_office}value'])
+            value = cell_element.attrib[f'{ns_office}value']
+            try:
+                return Decimal(value)
+            except InvalidOperation as e:
+                raise InvalidFloatValueError(value) from e
 
         def parse_percentage(cell_element):
-            return Percentage(cell_element.attrib[f'{ns_office}value'])
+            value = cell_element.attrib[f'{ns_office}value']
+            try:
+                return Percentage(value)
+            except InvalidOperation as e:
+                raise InvalidPercentageValueError(e) from e
+
+        def parse_string(cell_element, parsed_xml_it):
+           # Strings can be from an attribute...
+           attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
+           if attribute_string_value is not None:
+               return attribute_string_value
+
+           # ... but otherwise extract from contents
+           while True:
+               event, element = next(parsed_xml_it)
+               if event == 'end' and element is cell_element:
+                   return ''.join(cell_element.itertext())
 
         def parse_time(cell_element):
-            time_dict = time_regex.match(cell_element.attrib[f'{ns_office}time-value']).groupdict(0)
+            value = cell_element.attrib[f'{ns_office}time-value']
+            try:
+                time_dict = time_regex.match(value).groupdict(0)
+            except AttributeError as e:
+                raise InvalidTimeValueError(value) from e
+
             return Time(
                 time_dict.get('sign') or '+',
                 int(time_dict.get('years', '0')),
@@ -275,4 +294,36 @@ class MissingContentXMLError(InvalidODSFileError):
 
 
 class InvalidContentXMLError(InvalidODSFileError):
+    pass
+
+
+class InvalidODSXMLError(InvalidODSFileError):
+    pass
+
+
+class InvalidTypeError(InvalidODSXMLError):
+    pass
+
+
+class InvalidValueError(InvalidODSXMLError):
+    pass
+
+
+class InvalidBooleanValueError(InvalidValueError):
+    pass
+
+
+class InvalidDateValueError(InvalidValueError):
+    pass
+
+
+class InvalidFloatValueError(InvalidValueError):
+    pass
+
+
+class InvalidPercentageValueError(InvalidValueError):
+    pass
+
+
+class InvalidTimeValueError(InvalidValueError):
     pass

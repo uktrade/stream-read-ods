@@ -141,3 +141,27 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
       - **InvalidContentXMLError**
 
         The file claims to be an ODS file according to its MIME type, it contains a `content.xml` file, but it doesn't appear to contain valid XML. More detail is in the `__cause__` member of the raised exception, which is an exception that derives from [`lxml.etree.LxmlError`](https://lxml.de/api/lxml.etree.LxmlError-class.html)
+
+      - **InvalidODSXMLError**
+
+        The file has valid content as XML, but there is some aspect of the XML that makes it not parseable as a spreadsheet.
+
+        - **InvalidTypeError**
+
+        The data type of a cell is not one of the 8 ODS data types
+
+        - **InvalidValueError**
+
+        The value of a cell cannot be parsed as its declared type. More detail may be in the `__cause__` member of the raised exception.
+
+          - **InvalidBooleanValueError**
+
+          - **InvalidCurrencyValueError**
+
+          - **InvalidDateValueError**
+
+          - **InvalidFloatValueError**
+
+          - **InvalidPercentageValueError**
+
+          - **InvalidTimeValueError**
