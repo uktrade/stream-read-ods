@@ -7,7 +7,7 @@ from lxml import etree
 from stream_unzip import UnzipValueError, stream_unzip
 
 
-def stream_read_ods(ods_chunks, chunk_size=65536):
+def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chunk_size=65536):
 
     # lxml iterparse takes a file-like object, but stream_read_ods accepts an iterable
     # so we have to do some low-ish level faffing to convert from one to the other
@@ -79,6 +79,11 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             except etree.LxmlError as e:
                 raise InvalidContentXMLError() from e
 
+        def _append(l, value):
+            if len(l) == max_columns:
+                raise TooManyColumnsError(max_columns)
+            l.append(value)
+
         def table_rows(parsed_xml_it):
             row = None
 
@@ -95,7 +100,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
                 # Starting a table cell
                 if event == 'start' and f'{ns_table}table-cell' == element.tag:
-                    row.append(table_cell(parsed_xml_it, element))
+                    _append(row, table_cell(parsed_xml_it, element))
 
                 # Ending the table
                 if event == 'end' and f'{ns_table}table' == element.tag:
@@ -157,6 +162,18 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
             except InvalidOperation as e:
                 raise InvalidPercentageValueError(e) from e
 
+        def up_to_max_string_length(it):
+            l = 0
+            while True:
+                try:
+                    s = _next(it)
+                except StopIteration:
+                    break
+                l += len(s)
+                if l > max_string_length:
+                    raise StringTooLongError(max_string_length)
+                yield s
+
         def parse_string(cell_element, parsed_xml_it):
            # Strings can be from an attribute...
            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
@@ -165,9 +182,9 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
 
            # ... but otherwise extract from contents
            while True:
-               event, element = _next(parsed_xml_it)
-               if event == 'end' and element is cell_element:
-                   return ''.join(cell_element.itertext())
+                event, element = _next(parsed_xml_it)
+                if event == 'end' and element is cell_element:
+                    return ''.join(up_to_max_string_length(iter(cell_element.itertext())))
 
         def parse_time(cell_element):
             value = cell_element.attrib[f'{ns_office}time-value']
@@ -330,4 +347,16 @@ class InvalidPercentageValueError(InvalidValueError):
 
 
 class InvalidTimeValueError(InvalidValueError):
+    pass
+
+
+class SizeError(StreamReadODSError):
+    pass
+
+
+class TooManyColumnsError(StreamReadODSError):
+    pass
+
+
+class StringTooLongError(StreamReadODSError):
     pass

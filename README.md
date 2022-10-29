@@ -142,6 +142,8 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
         The file claims to be an ODS file according to its MIME type, it contains a `content.xml` file, but it doesn't appear to contain valid XML. More detail is in the `__cause__` member of the raised exception, which is an exception that derives from [`lxml.etree.LxmlError`](https://lxml.de/api/lxml.etree.LxmlError-class.html)
 
+        This exception may be raised in cases the underlying XML requires a high amount of memory to be parsed.
+
       - **InvalidODSXMLError**
 
         The file has valid content as XML, but there is some aspect of the XML that makes it not parseable as a spreadsheet.
@@ -165,3 +167,15 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
           - **InvalidPercentageValueError**
 
           - **InvalidTimeValueError**
+
+    - **SizeError**
+
+      The file appears valid as an ODS file so far, but processing hat hit a size related limit. These limits are in place to avoid unexpected high memory use.
+
+      - **TooManyColumnsError**
+
+        More columns than the `max_columns` argument to `stream_read_ods` have been encountered. The default limit is 65536.
+
+      - **StringTooLongError**
+
+        A cell with a string value that's longer than the `max_string_length` argument to `stream_read_ods` has been encountered. The default limit is 65536.

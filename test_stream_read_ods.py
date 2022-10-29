@@ -13,6 +13,8 @@ from stream_read_ods import (
     IncorrectMIMETypeError,
     MissingContentXMLError,
     InvalidContentXMLError,
+    TooManyColumnsError,
+    StringTooLongError,
     stream_read_ods,
     simple_table,
 )
@@ -262,3 +264,32 @@ def test_not_zip():
 
     with pytest.raises(UnzipError):
         next(stream_read_ods(junk()))
+
+
+def test_string_limit():
+    def get_sheets():
+        yield 'Sheet 1 name', ('col_1_name',), (('Value A' * 100000,),)
+
+    cols, rows = next(stream_read_ods(stream_write_ods(get_sheets())))
+    next(rows)
+    with pytest.raises(StringTooLongError):
+        next(rows)
+
+
+def test_string_limit_huge():
+    def get_sheets():
+        yield 'Sheet 1 name', ('col_1_name',), (('Value A' * 10000000,),)
+
+    cols, rows = next(stream_read_ods(stream_write_ods(get_sheets())))
+    next(rows)
+    with pytest.raises(InvalidContentXMLError):
+        next(rows)
+
+
+def test_too_many_columns():
+    def get_sheets():
+        yield 'Sheet 1 name', ('col_1_name',) * 100000, (('Value A',),)
+
+    cols, rows = next(stream_read_ods(stream_write_ods(get_sheets())))
+    with pytest.raises(TooManyColumnsError):
+        next(rows)
