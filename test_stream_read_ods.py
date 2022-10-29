@@ -22,7 +22,7 @@ from stream_zip import ZIP_32, NO_COMPRESSION_32, stream_zip
 def test_stream_write_ods():
     def get_sheets():
         def get_rows_of_sheet_1():
-            yield 'Value A', None, True, False
+            yield 'Value A & B', None, True, False
             yield 1, 1.2, date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6)
 
         yield 'Sheet 1 name', ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'), get_rows_of_sheet_1()
@@ -42,7 +42,7 @@ def test_stream_write_ods():
     assert files == [
         ('Sheet 1 name', [
             ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'),
-            ('Value A', None, True, False),
+            ('Value A & B', None, True, False),
             (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
         ]),
         ('Sheet 2 name', [('col_1_name',), ('col_1_value',), (None,)]),
@@ -64,7 +64,7 @@ def test_stream_write_ods():
             'Sheet 1 name',
             ('col_1_name', 'col_2_name', 'col_5_name', 'col_4_name'),
             [
-                ('Value A', None, True, False),
+                ('Value A & B', None, True, False),
                 (Decimal('1'), Decimal('1.2'), date(2021, 1, 2), datetime(2021, 1, 2, 3, 4, 5, 6))
             ],
         ),

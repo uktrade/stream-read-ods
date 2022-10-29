@@ -208,7 +208,7 @@ def stream_read_ods(ods_chunks, chunk_size=65536):
     unzipped_member_files = stream_unzip(ods_chunks, chunk_size=chunk_size)
     content_xml_chunks = validate_mimetype_and_get_content(unzipped_member_files)
     content_xml_file_like_obj = to_file_like_obj(content_xml_chunks)
-    content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'))
+    content_xml_parsed = etree.iterparse(content_xml_file_like_obj, events=('start', 'end'), resolve_entities=False)
 
     try:
         yield from get_sheets_and_rows(content_xml_parsed)
