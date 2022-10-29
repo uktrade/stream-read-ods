@@ -175,13 +175,13 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                 yield s
 
         def parse_string(cell_element, parsed_xml_it):
-           # Strings can be from an attribute...
-           attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
-           if attribute_string_value is not None:
-               return attribute_string_value
+            # Strings can be from an attribute...
+            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
+            if attribute_string_value is not None:
+                return attribute_string_value
 
-           # ... but otherwise extract from contents
-           while True:
+            # ... but otherwise extract from contents
+            while True:
                 event, element = _next(parsed_xml_it)
                 if event == 'end' and element is cell_element:
                     return ''.join(up_to_max_string_length(iter(cell_element.itertext())))
