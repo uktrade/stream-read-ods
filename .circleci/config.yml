@@ -53,7 +53,7 @@ jobs:
           name: Upload coverage
           command: |
             set -exu
-            ~/workspace/cc-test-reporter sum-coverage ~/workspace/coverage/*.json -p 9
+            ~/workspace/cc-test-reporter sum-coverage ~/workspace/coverage/*.json -p 11
             ~/workspace/cc-test-reporter upload-coverage
 
 workflows:
@@ -66,6 +66,8 @@ workflows:
           matrix:
             parameters:
               python-version:
+                - "3.6.9"
+                - "3.6.15"
                 - "3.7.4"
                 - "3.7.11"
                 - "3.8.0"

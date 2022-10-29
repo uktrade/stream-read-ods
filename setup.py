@@ -20,7 +20,7 @@ setuptools.setup(
         'License :: OSI Approved :: MIT License',
         'Topic :: System :: Archiving :: Compression',
     ],
-    python_requires='>=3.7.4',
+    python_requires='>=3.6.9',
     install_requires=[
         'stream-unzip>=0.0.70',
         'lxml>=4.9.1',
