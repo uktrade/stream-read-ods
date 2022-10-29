@@ -168,27 +168,35 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                 # Like lxml's itertext, but doesn't use recursion and clears memory along the way
                 l = 0
                 previous_event = None
-                text = ''
+                stack = ['', '']
                 while True:
                     event, element = _next(parsed_xml_it)
-                    if event == 'end':
-                        element_text = (element.text or '')
-                        element_tail = (element.tail or '') if element is not cell_element else ''
 
-                        l += len(element_text) + len(element_tail)
-                        if l > max_string_length:
-                            raise StringTooLongError(max_string_length)
-                        text = \
-                            (element_text + text + element_tail) if previous_event == 'end' else \
-                            (text + element_text + element_tail)
-                        clear_mem(event, element)
+                    if event == 'start' and previous_event == 'start':
+                        stack.append('')
+                        continue
+
+                    element_text = (element.text or '')
+                    element_tail = (element.tail or '') if element is not cell_element else ''
+                    l += len(element_text) + len(element_tail)
+                    if l > max_string_length:
+                        raise StringTooLongError(max_string_length)
+
+                    if event == 'end' and previous_event == 'end':
+                        popped = stack.pop()
+                        stack[-1] += element_text + popped + element_tail
+
+                    if event == 'end' and previous_event != 'end':
+                        stack[-1] += element_text + element_tail
+
+                    clear_mem(event, element)
 
                     if event == 'end' and element is cell_element:
                         break
 
                     previous_event = event
 
-                return text
+                return stack[0]
 
             attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
             return \
