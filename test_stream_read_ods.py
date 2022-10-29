@@ -293,3 +293,24 @@ def test_too_many_columns():
     cols, rows = next(stream_read_ods(stream_write_ods(get_sheets())))
     with pytest.raises(TooManyColumnsError):
         next(rows)
+
+
+def test_high_depth():
+
+    def unzipped_files():
+        modified_at = datetime.now()
+        perms = 0o600
+
+        def file_1_data():
+            yield b'application/vnd.oasis.opendocument.spreadsheet'
+
+        yield 'mimetype', modified_at, perms, NO_COMPRESSION_32, file_1_data()
+
+        def file_2_data():
+            yield b'<t>' * 1000 + b'</t>' * 1000
+
+        yield 'content.xml', modified_at, perms, ZIP_32, file_2_data()
+
+
+    with pytest.raises(InvalidContentXMLError):
+        next(stream_read_ods(stream_zip(unzipped_files())))
