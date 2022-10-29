@@ -148,7 +148,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
         - **InvalidTypeError**
 
-        The data type of a cell is not one of the 8 ODS data types
+          The data type of a cell is not one of the 8 ODS data types
 
         - **InvalidValueError**
 
