@@ -162,29 +162,35 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
             except InvalidOperation as e:
                 raise InvalidPercentageValueError(e) from e
 
-        def up_to_max_string_length(it):
-            l = 0
-            while True:
-                try:
-                    s = _next(it)
-                except StopIteration:
-                    break
-                l += len(s)
-                if l > max_string_length:
-                    raise StringTooLongError(max_string_length)
-                yield s
-
         def parse_string(cell_element, parsed_xml_it):
-            # Strings can be from an attribute...
-            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
-            if attribute_string_value is not None:
-                return attribute_string_value
 
-            # ... but otherwise extract from contents
-            while True:
-                event, element = _next(parsed_xml_it)
-                if event == 'end' and element is cell_element:
-                    return ''.join(up_to_max_string_length(iter(cell_element.itertext())))
+            def itertext():
+                # Like lxml's itertext, but doesn't use recursion and clears memory along the way
+                l = 0
+                previous_event = None
+                text = ''
+                while True:
+                    event, element = _next(parsed_xml_it)
+                    if event == 'end':
+                        l += len(element.text or '') + len(element.tail or '')
+                        if l > max_string_length:
+                            raise StringTooLongError(max_string_length)
+                        text = \
+                            ((element.text or '') + text + (element.tail or '')) if previous_event == 'end' else \
+                            (text + (element.text or '') + (element.tail or ''))
+                        clear_mem(event, element)
+
+                    if event == 'end' and element is cell_element:
+                        break
+
+                    previous_event = event
+
+                return text
+
+            attribute_string_value = cell_element.attrib.get(f'{ns_office}:string-value')
+            return \
+                attribute_string_value if attribute_string_value is not None else \
+                itertext()
 
         def parse_time(cell_element):
             value = cell_element.attrib[f'{ns_office}time-value']
