@@ -116,14 +116,14 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                         raise InvalidODSXMLError from e
 
                     try:
-                        num_spans = int(element.attrib.get(f'{ns_table}number-columns-spanned', '1'))
+                        num_col_spans = int(element.attrib.get(f'{ns_table}number-columns-spanned', '1'))
                     except ValueError as e:
                         raise InvalidODSXMLError from e
 
                     value = table_cell(parsed_xml_it, element)
                     # There isn't a perfect choice as to how to handle spans. However, opting to repeat
                     # the value. This isn't right visually, but makes sense sense for "header" type cells
-                    for i in range(0, num_repeats * num_spans):
+                    for i in range(0, num_repeats * num_col_spans):
                         _append(row, value)
 
                 # Ending the table
