@@ -88,6 +88,15 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
         def table_rows(parsed_xml_it):
             row = None
 
+            def trim_trailing_nones(values):
+                # Excel ODS files output a _lot_ of trailing Nones
+                end = len(values)
+                for i in range(len(values) - 1, -1, -1):
+                    if values[i] is not None:
+                        break
+                    end = i
+                return tuple(values[0:end])
+
             while True:
                 event, element = _next(parsed_xml_it)
 
@@ -97,11 +106,17 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
 
                 # Ending a row
                 if event == 'end' and f'{ns_table}table-row' == element.tag:
-                    yield tuple(row)
+                    yield trim_trailing_nones(row)
 
                 # Starting a table cell
                 if event == 'start' and f'{ns_table}table-cell' == element.tag:
-                    _append(row, table_cell(parsed_xml_it, element))
+                    try:
+                        num_repeats = int(element.attrib.get(f'{ns_table}number-columns-repeated', '1'))
+                    except ValueError as e:
+                        raise InvalidODSXMLError from e
+                    value = table_cell(parsed_xml_it, element)
+                    for i in range(0, num_repeats):
+                        _append(row, value)
 
                 # Ending the table
                 if event == 'end' and f'{ns_table}table' == element.tag:
@@ -264,6 +279,7 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
 
 
 def simple_table(rows, skip_rows=0):
+
     def up_to_first_none(values):
         vals = []
         for value in values:
