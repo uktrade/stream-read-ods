@@ -40,6 +40,7 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_
 
     def validate_mimetype_and_get_content(unzipped_files):
         correct_mimetype = b'application/vnd.oasis.opendocument.spreadsheet'
+        found_content_xml = False
 
         for i, (name, size, chunks) in enumerate(unzipped_files):
             if i == 0 and name != b'mimetype':
@@ -61,9 +62,10 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_
                     pass
                 continue
 
+            found_content_xml = True
             yield from chunks
-            break
-        else:
+
+        if not found_content_xml:
             raise MissingContentXMLError()
 
     def get_sheets_and_rows(parsed_xml):
@@ -343,6 +345,8 @@ def simple_table(rows, skip_rows=0):
             if all((val is None) for val in row):
                 break
             yield row
+        for _ in rows:
+            pass
 
     for i, row in enumerate(rows):
         if i == skip_rows:
