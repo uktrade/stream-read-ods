@@ -96,6 +96,11 @@ Instead, a [namedtuple](https://docs.python.org/3/library/collections.html#colle
 | seconds | Decimal |
 
 
+## Merged cells
+
+Merged cells in the spreadsheet are split, with the same value copied into all of the resulting cells. This is probably The Right Thing when converting a spreadsheet into a dataframe-like structure.
+
+
 ## Running tests
 
 ```
