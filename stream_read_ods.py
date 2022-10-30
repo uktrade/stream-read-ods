@@ -71,6 +71,7 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
         # Thanks to https://stackoverflow.com/a/2765366/1319998
         time_regex = re.compile(r'(?P<sign>-?)P(?:(?P<years>\d+)Y)?(?:(?P<months>\d+)M)?(?:(?P<days>\d+)D)?(?:T(?:(?P<hours>\d+)H)?(?:(?P<minutes>\d+)M)?(?:(?P<seconds>([0-9]*[.])?[0-9]+)S)?)?')
         ns_table = '{urn:oasis:names:tc:opendocument:xmlns:table:1.0}'
+        ns_text = '{urn:oasis:names:tc:opendocument:xmlns:text:1.0}'
         ns_office = '{urn:oasis:names:tc:opendocument:xmlns:office:1.0}'
 
         def _next(it):
@@ -165,34 +166,41 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
         def parse_string(cell_element, parsed_xml_it):
 
             def itertext():
-                # Like lxml's itertext, but doesn't use recursion and clears memory along the way
+                # Like lxml's itertext, but doesn't use recursion, clears memory along the way, and
+                # converts all p tags after the first into a newline
                 l = 0
                 previous_event = None
+                seen_p = False
                 stack = ['', '']
                 while True:
                     event, element = _next(parsed_xml_it)
+                    print(element)
 
                     if event == 'start' and previous_event == 'start':
                         stack.append('')
-                        continue
 
-                    element_text = (element.text or '')
-                    element_tail = (element.tail or '') if element is not cell_element else ''
-                    l += len(element_text) + len(element_tail)
-                    if l > max_string_length:
-                        raise StringTooLongError(max_string_length)
+                    if event == 'end':
+                        newline = '\n' if element.tag == f'{ns_text}p' and seen_p else ''
+                        element_text = newline + (element.text or '')
+                        element_tail = (element.tail or '') if element is not cell_element else ''
+                        l += len(element_text) + len(element_tail)
+                        if l > max_string_length:
+                            raise StringTooLongError(max_string_length)
 
-                    if event == 'end' and previous_event == 'end':
-                        popped = stack.pop()
-                        stack[-1] += element_text + popped + element_tail
+                        if previous_event == 'end':
+                            popped = stack.pop()
+                            stack[-1] += element_text + popped + element_tail
 
-                    if event == 'end' and previous_event != 'end':
-                        stack[-1] += element_text + element_tail
+                        if previous_event != 'end':
+                            stack[-1] += element_text + element_tail
 
-                    clear_mem(event, element)
+                        clear_mem(event, element)
 
-                    if event == 'end' and element is cell_element:
-                        break
+                        if element is cell_element:
+                            break
+
+                        if element.tag == f'{ns_text}p':
+                            seen_p = True
 
                     previous_event = event
 

@@ -136,6 +136,22 @@ def test_excel_export():
     ]
 
 
+def test_excel_with_styles_export():
+    def get_ods_chunks():
+        with open('fixtures/excel-with-styles.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [('Sheet1', [('Fist line\nSecondline\n\nFinal line initalic', None), (None,)])]
+
+
 def test_libreoffice_export():
     def get_ods_chunks():
         with open('fixtures/libreoffice.ods', 'rb') as f:
@@ -174,6 +190,22 @@ def test_libreoffice_export():
             ]
         ),
     ]
+
+
+def test_libreoffice_with_styles_export():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice-with-styles.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [('Sheet1', [('First line\nSecond bold\n\nItalic\nAnother font', 'More')])]
 
 
 def test_libreoffice_doc():
