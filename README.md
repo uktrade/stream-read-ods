@@ -98,7 +98,7 @@ Instead, a [namedtuple](https://docs.python.org/3/library/collections.html#colle
 
 ## Merged cells
 
-Merged cells in the spreadsheet are split, with the same value copied into all of the resulting cells. This is probably The Right Thing when converting a spreadsheet into a dataframe-like structure.
+Merged cells in the spreadsheet are split, with the same value copied into all of the resulting cells. This is probably The Right Thing when converting a spreadsheet into a dataframe-like structure since such cells are usually header-like.
 
 
 ## Running tests
