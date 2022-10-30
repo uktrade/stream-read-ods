@@ -183,6 +183,10 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
         More columns than the `max_columns` argument to `stream_read_ods` have been encountered. The default limit is 65536.
 
+      - **TooManySplitCells**
+
+        When splitting merged cells, more split cells need to be created than the `max_split_cells` argument to `stream_read_ods` allows. The default limit is 65536.
+
       - **StringTooLongError**
 
         A cell with a string value that's longer than the `max_string_length` argument to `stream_read_ods` has been encountered. The default limit is 65536.

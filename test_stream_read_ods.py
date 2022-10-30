@@ -14,6 +14,7 @@ from stream_read_ods import (
     MissingContentXMLError,
     InvalidContentXMLError,
     TooManyColumnsError,
+    TooManySplitCells,
     StringTooLongError,
     stream_read_ods,
     simple_table,
@@ -273,6 +274,20 @@ def test_libreoffice_with_row_cols_spanned_repeated_export():
         ('Value', 'Value', 'Value', 'Value', 'Value', 'Value', 'After G1'),
         ('Value', 'Value', 'Value', 'Value', 'Value', 'Value', 'After G2'),
         ('After A3',)])]
+
+
+def test_libreoffice_with_many_merged_cells():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice-with-many-merged-cells.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    sheet, rows = next(stream_read_ods(get_ods_chunks()))
+    with pytest.raises(TooManySplitCells):
+       next(rows)
 
 
 def test_libreoffice_doc():

@@ -7,7 +7,7 @@ from lxml import etree
 from stream_unzip import UnzipValueError, stream_unzip
 
 
-def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chunk_size=65536):
+def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_split_cells=65536, chunk_size=65536):
 
     # lxml iterparse takes a file-like object, but stream_read_ods accepts an iterable
     # so we have to do some low-ish level faffing to convert from one to the other
@@ -157,6 +157,8 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                         if r != 0 or s !=0
                     )
                     for r, s in covered_cell_indexes:
+                        if len(covered_cells) == max_split_cells:
+                            raise TooManySplitCells(max_split_cells)
                         covered_cells[(i + r, j + s)] = value
 
                     for r in range(0, num_repeats):
@@ -441,6 +443,10 @@ class SizeError(StreamReadODSError):
 
 
 class TooManyColumnsError(StreamReadODSError):
+    pass
+
+
+class TooManySplitCells(StreamReadODSError):
     pass
 
 
