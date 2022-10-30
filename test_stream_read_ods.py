@@ -240,6 +240,41 @@ def test_libreoffice_with_spanned_export():
     assert files == [('Sheet1', [('to be spanned', 'to be spanned', 'to be spanned', 'to be spanned', 'after spanned')])]
 
 
+def test_libreoffice_with_row_spanned_export():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice-with-row-spanned.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [('Sheet1', [('Column span', 'B1'), ('Column span', 'B2'), ('After column span',)])]
+
+
+def test_libreoffice_with_row_cols_spanned_repeated_export():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice-with-row-col-spans-repeated.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [('Sheet1', [
+        ('Value', 'Value', 'Value', 'Value', 'Value', 'Value', 'After G1'),
+        ('Value', 'Value', 'Value', 'Value', 'Value', 'Value', 'After G2'),
+        ('After A3',)])]
+
+
 def test_libreoffice_doc():
     def get_chunks():
         with open('fixtures/doc.odt', 'rb') as f:

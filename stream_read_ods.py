@@ -121,7 +121,10 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                         raise InvalidODSXMLError from e
 
                     for r in range(0, num_repeats):
-                        value = covered_cells.pop((i, j))
+                        try:
+                            value = covered_cells.pop((i, j))
+                        except KeyError as e:
+                            raise InvalidODSXMLError from e
                         _append(row, value)
                         i += 1
 
@@ -137,9 +140,24 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                     except ValueError as e:
                         raise InvalidODSXMLError from e
 
+                    try:
+                        num_row_spans = int(element.attrib.get(f'{ns_table}number-rows-spanned', '1'))
+                    except ValueError as e:
+                        raise InvalidODSXMLError from e
+
+                    if num_repeats > 1 and (num_col_spans > 1 or num_row_spans > 1):
+                        # Have not seen a real world example of this. For now, seems safer to fail
+                        raise InvalidODSXMLError('Cell row or column spanning combined with repeats is not supported')
+
                     value = table_cell(parsed_xml_it, element)
-                    for r in range(1, num_col_spans):
-                        covered_cells[(i + r, j)] = value
+                    covered_cell_indexes = (
+                        (r, s)
+                        for r in range(0, num_col_spans)
+                        for s in range(0, num_row_spans)
+                        if r != 0 or s !=0
+                    )
+                    for r, s in covered_cell_indexes:
+                        covered_cells[(i + r, j + s)] = value
 
                     for r in range(0, num_repeats):
                         _append(row, value)
