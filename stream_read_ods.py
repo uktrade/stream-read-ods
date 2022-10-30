@@ -174,7 +174,6 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                 stack = ['', '']
                 while True:
                     event, element = _next(parsed_xml_it)
-                    print(element)
 
                     if event == 'start' and previous_event == 'start':
                         stack.append('')
