@@ -88,6 +88,10 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
         def table_rows(parsed_xml_it):
             row = None
 
+            covered_cells = {}
+            i = 0
+            j = 0
+
             def trim_trailing_nones(values):
                 # Excel ODS files output a _lot_ of trailing Nones
                 end = len(values)
@@ -107,6 +111,19 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                 # Ending a row
                 if event == 'end' and f'{ns_table}table-row' == element.tag:
                     yield trim_trailing_nones(row)
+                    i = 0
+                    j += 1
+
+                if event == 'start' and f'{ns_table}covered-table-cell' == element.tag:
+                    try:
+                        num_repeats = int(element.attrib.get(f'{ns_table}number-columns-repeated', '1'))
+                    except ValueError as e:
+                        raise InvalidODSXMLError from e
+
+                    for r in range(0, num_repeats):
+                        value = covered_cells.pop((i, j))
+                        _append(row, value)
+                        i += 1
 
                 # Starting a table cell
                 if event == 'start' and f'{ns_table}table-cell' == element.tag:
@@ -121,10 +138,13 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, chun
                         raise InvalidODSXMLError from e
 
                     value = table_cell(parsed_xml_it, element)
-                    # There isn't a perfect choice as to how to handle spans. However, opting to repeat
-                    # the value. This isn't right visually, but makes sense sense for "header" type cells
-                    for i in range(0, num_repeats * num_col_spans):
+                    for r in range(1, num_col_spans):
+                        covered_cells[(i + r, j)] = value
+
+                    for r in range(0, num_repeats):
                         _append(row, value)
+                        i += 1
+
 
                 # Ending the table
                 if event == 'end' and f'{ns_table}table' == element.tag:
