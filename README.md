@@ -69,7 +69,7 @@ There are [8 possible data types in an Open Document Spreadsheet](https://docs.o
 | time        | [stream_read_ods.Time](#stream_read_odstime)             |
 | void        | NoneType                                                 |
 
-Note that a string in an ODS file can be structured and styled - under the hood this is with an HTML-like syntax. However, this information is not exposed by the conversion process. The exception is that each paragraph - `p` tag - after the first is converted into a newline.
+Note that a string in an ODS file can be structured and styled - under the hood this is with an HTML-like syntax. However, these structures and styles are not preserved by the conversion process. The exception is that each paragraph - `p` tag - after the first is converted into a newline.
 
 ### stream_read_ods.Currency
 
