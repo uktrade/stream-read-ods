@@ -224,6 +224,22 @@ def test_libreoffice_with_repeated_export():
     assert files == [('Sheet1', [('to be repeated', 'to be repeated', 'to be repeated', 'to be repeated', 'after repeated')])]
 
 
+def test_libreoffice_with_spanned_export():
+    def get_ods_chunks():
+        with open('fixtures/libreoffice-with-spanned.ods', 'rb') as f:
+            while True:
+                chunk = f.read(10)
+                if not chunk:
+                    break
+                yield chunk
+
+    files = [
+        (name, list(rows))
+        for name, rows in stream_read_ods(get_ods_chunks())
+    ]
+    assert files == [('Sheet1', [('to be spanned', 'to be spanned', 'to be spanned', 'to be spanned', 'after spanned')])]
+
+
 def test_libreoffice_doc():
     def get_chunks():
         with open('fixtures/doc.odt', 'rb') as f:
