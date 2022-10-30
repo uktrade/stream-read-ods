@@ -177,7 +177,7 @@ Exceptions raised by the source iterable are passed through `stream_read_ods` un
 
     - **SizeError**
 
-      The file appears valid as an ODS file so far, but processing hat hit a size related limit. These limits are in place to avoid unexpected high memory use.
+      The file appears valid as an ODS file so far, but processing has hit a size related limit. These limits are in place to avoid unexpected high memory use.
 
       - **TooManyColumnsError**
 
