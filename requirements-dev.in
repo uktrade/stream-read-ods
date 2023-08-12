@@ -1,6 +1,0 @@
--e file:.#egg=stream_read_ods
-coverage
-pytest
-pytest-cov
-stream_write_ods
-stream-zip
