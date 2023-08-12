@@ -1,6 +1,6 @@
 # stream-read-ods
 
-[![PyPI package](https://img.shields.io/pypi/v/stream-read-ods?label=PyPI%20package&color=%234c1)](https://pypi.org/project/stream-read-ods/) [![Test suite](https://img.shields.io/github/actions/workflow/status/uktrade/stream-read-ods/tests.yml?label=Test%20suite)](https://github.com/uktrade/stream-read-ods/actions/workflows/tests.yml) [![Code coverage](https://img.shields.io/codecov/c/github/uktrade/stream-read-ods?label=Code%20coverage)](https://app.codecov.io/gh/uktrade/stream-read-ods)
+[![PyPI package](https://img.shields.io/pypi/v/stream-read-ods?label=PyPI%20package&color=%234c1)](https://pypi.org/project/stream-read-ods/) [![Test suite](https://img.shields.io/github/actions/workflow/status/uktrade/stream-read-ods/test.yml?label=Test%20suite)](https://github.com/uktrade/stream-read-ods/actions/workflows/test.yml) [![Code coverage](https://img.shields.io/codecov/c/github/uktrade/stream-read-ods?label=Code%20coverage)](https://app.codecov.io/gh/uktrade/stream-read-ods)
 
 Python function to extract data from an ODS spreadsheet on the fly - without having to store the entire file in memory or disk
 
