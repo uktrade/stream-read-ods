@@ -104,7 +104,7 @@ Merged cells in the spreadsheet are split, with the same value copied into all o
 ## Running tests
 
 ```
-pip install -r requirements-dev.txt
+pip install -e ".[dev]"
 pytest
 ```
 

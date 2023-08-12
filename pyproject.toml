@@ -1,0 +1,39 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stream-read-ods"
+version = "0.0.21"
+authors = [
+  { name="Department for International Trade", email="sre@digital.trade.gov.uk" },
+]
+description = "Python function to extract data from an ODS spreadsheet on the fly - without having to store the entire file in memory or disk"
+readme = "README.md"
+requires-python = ">=3.7.4"
+classifiers = [
+    'Programming Language :: Python :: 3',
+    'License :: OSI Approved :: MIT License',
+    'Topic :: System :: Archiving :: Compression',
+]
+dependencies = [
+    'stream-unzip>=0.0.70',
+    'lxml>=4.9.1',
+]
+
+[project.optional-dependencies]
+dev = [
+    "coverage",
+    "pytest",
+    "pytest-cov",
+    "stream_write_ods",
+    "stream-zip",
+]
+
+[project.urls]
+"Source" = "https://github.com/uktrade/stream-read-ods"
+
+[tool.hatch.build]
+include = [
+  "stream_read_ods.py"
+]
