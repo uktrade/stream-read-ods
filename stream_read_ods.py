@@ -6,6 +6,33 @@ import re
 from lxml import etree
 from stream_unzip import UnzipValueError, stream_unzip
 
+class RowHolder:
+    def __init__(self, max_columns: int):
+        self.values = [None] * max_columns
+        self.len = 0
+
+    def reset(self):
+        self.len = 0
+
+    def append(self, value):
+        try:
+            self.values[self.len] = value
+            self.len += 1
+
+        except IndexError:
+            raise TooManyColumnsError(len(self.values))
+            # The try/catch seems to be slightly faster than an explicit check
+
+    def tuple_without_trailing_nones(self):
+        # Excel ODS files output a _lot_ of trailing Nones
+        end = self.len
+        for i in range(self.len - 1, -1, -1):
+            if self.values[i] is not None:
+                break
+            end = i
+
+        return tuple(self.values[0:end])
+
 
 def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_split_cells=65536, chunk_size=65536):
 
@@ -82,37 +109,22 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_
             except etree.LxmlError as e:
                 raise InvalidContentXMLError() from e
 
-        def _append(l, value):
-            if len(l) == max_columns:
-                raise TooManyColumnsError(max_columns)
-            l.append(value)
-
         def table_rows(parsed_xml_it):
-            row = None
-
+            current_row = RowHolder(max_columns)
             covered_cells = {}
             i = 0
             j = 0
-
-            def trim_trailing_nones(values):
-                # Excel ODS files output a _lot_ of trailing Nones
-                end = len(values)
-                for i in range(len(values) - 1, -1, -1):
-                    if values[i] is not None:
-                        break
-                    end = i
-                return tuple(values[0:end])
 
             while True:
                 event, element = _next(parsed_xml_it)
 
                 # Starting a row
                 if event == 'start' and f'{ns_table}table-row' == element.tag:
-                    row = []
+                    current_row.reset()
 
                 # Ending a row
                 if event == 'end' and f'{ns_table}table-row' == element.tag:
-                    yield trim_trailing_nones(row)
+                    yield current_row.tuple_without_trailing_nones()
                     i = 0
                     j += 1
 
@@ -127,7 +139,7 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_
                             value = covered_cells.pop((i, j))
                         except KeyError as e:
                             raise InvalidODSXMLError from e
-                        _append(row, value)
+                        current_row.append(value)
                         i += 1
 
                 # Starting a table cell
@@ -164,7 +176,7 @@ def stream_read_ods(ods_chunks, max_string_length=65536, max_columns=65536, max_
                         covered_cells[(i + r, j + s)] = value
 
                     for r in range(0, num_repeats):
-                        _append(row, value)
+                        current_row.append(value)
                         i += 1
 
 
